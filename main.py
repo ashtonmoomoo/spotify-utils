@@ -8,7 +8,7 @@ import urllib
 
 CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID_A2L')
 CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET_A2L')
-REDIRECT_URI = 'http://localhost:5000'
+REDIRECT_URI = 'http://localhost:5000' if os.environ.get('FLASK_DEBUG') == 'True' else 'https://album2library.herokuapp.com'
 
 SCOPES = "user-library-read user-library-modify"
 
