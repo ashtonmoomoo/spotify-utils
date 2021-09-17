@@ -27,7 +27,14 @@ def home():
         """
 
     else:
-        return f"<a href=\"{make_url()}\">Click here to log into Spotify.</a>"
+        return f"""
+            <h2><b>Warning</b></h2>
+            <h4>Clicking the log into spotify link and granting this app permissions will start the whole process without anymore input (I cbf making more buttons).</h4>
+            <h4>Only click the button if you're sure you want to add all songs from the albums you have liked to your liked songs.</h4>
+            <h5><i>It's not my fault if I mess up your library</i></h5>
+            <a href=\"{make_url()}\">Click here to log into Spotify.</a></br></br>
+            <a href=\"https://github.com/ashtonmoomoo/spotify-utils\">Source code here</a>
+        """
 
 def make_url():
     base = 'https://accounts.spotify.com/authorize?'
