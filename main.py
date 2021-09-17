@@ -4,27 +4,28 @@ import requests
 import base64
 import os
 from spotipy import Spotify
-from spotipy.oauth2 import SpotifyOAuth
 import urllib
 
 CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID_A2L')
 CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET_A2L')
 REDIRECT_URI = 'http://localhost:5000'
 
-SCOPE = "user-library-read"
+SCOPES = "user-library-read user-library-modify"
 
 app = flask.Flask(__name__)
 
 @app.get('/')
 def home():
-
     if code := request.args.get('code'):
         token = get_access_token(code)
         client = Spotify(auth=token)
-        albums = get_all_songs_from_albums(client)
-        return f"""
-            <p>{albums}</p>
+        songs = get_all_songs_from_albums(client)
+        find_unliked_songs(client, songs)
+
+        return """
+            <p>if you can see this then it's probs done. check ur spotify</p>
         """
+
     else:
         return f"<a href=\"{make_url()}\">Click here to log into Spotify.</a>"
 
@@ -34,13 +35,11 @@ def make_url():
         'client_id': CLIENT_ID,
         'response_type': 'code',
         'redirect_uri': REDIRECT_URI,
-        'scope': SCOPE
+        'scope': SCOPES
     }
     return base + urllib.parse.urlencode(params)
 
 def get_access_token(code):
-
-
     data = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -63,9 +62,29 @@ def get_all_songs_from_albums(client):
     songs = []
     max_albums = 50
     offset = 0
+    next_exists = True
 
-    albums = client.current_user_saved_albums(limit=max_albums, offset=offset)
+    while next_exists:
+        albums = client.current_user_saved_albums(limit=max_albums, offset=offset)
 
-    songs += [track.get("uri") for track in albums.get("items")[0].get("album").get("tracks").get("items")]
+        for album in albums.get("items"):
+            songs += [track.get("uri") for track in album.get("album").get("tracks").get("items")]
+        offset += max_albums
+
+        next_exists = bool(albums.get("next"))
 
     return songs
+
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
+def find_unliked_songs(client, songs):
+    for b in batch(songs, n=50):
+        truth_array = client.current_user_saved_tracks_contains(b)
+        songs_to_like = [b[i] for i in range(len(b)) if not truth_array[i]]
+        if len(songs_to_like) > 0:
+            client.current_user_saved_tracks_add(songs_to_like)
+
+    return songs_to_like
