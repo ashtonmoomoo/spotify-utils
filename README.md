@@ -7,3 +7,7 @@ So I made this app to like all your songs from albums that you've liked, but not
 
 ## _A word of warning_
 I didn't bother making this reversable, so you should be sure you want this. For me it introduced 2k new songs to my library.
+
+### _Another warning_
+If your Spotify library is too chunky and cause the process to take more than 30 seconds, Heroku free tier will fall over and give you a 500 (I think).
+I don't wanna try fix that so I wrote [a cli version](https://github.com/ashtonmoomoo/spotify-utils-cli) where you can supply your own API keys and run the process locally if you're _that_ keen.
